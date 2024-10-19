@@ -10,6 +10,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import * as auth from "../utils/auth";
 
 function App() {
+  const [userData, setUserData] = useState({ username: "", email: "" });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const navigate = useNavigate();
@@ -30,6 +31,27 @@ function App() {
     }
   };
 
+  // handleLogin accepts one parameter: an object with two properties.
+  const handleLogin = ({ username, password }) => {
+    // If username or password empty, return without sending a request.
+    if (!username || !password) {
+      return;
+    }
+
+    // We pass the username and password as positional arguments. The
+    // authorize function is set up to rename `username` to `identifier`
+    // before sending a request to the server, because that is what the
+    // API is expecting.
+    auth
+      .authorize(username, password)
+      .then((data) => {
+        // For now we just log the response data to the console.
+        // We'll update this soon.
+        console.log(data);
+      })
+      .catch(console.error);
+  };
+
   return (
     <Routes>
       <Route
@@ -44,7 +66,7 @@ function App() {
         path="/my-profile"
         element={
           <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <MyProfile />
+            <MyProfile userData={userData} />
           </ProtectedRoute>
         }
       />
@@ -52,7 +74,7 @@ function App() {
         path="/login"
         element={
           <div className="loginContainer">
-            <Login />
+            <Login handleLogin={handleLogin} />
           </div>
         }
       />
