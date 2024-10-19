@@ -8,6 +8,8 @@ import Register from "./Register";
 import "./styles/App.css";
 import ProtectedRoute from "./ProtectedRoute";
 import * as auth from "../utils/auth";
+import { setToken, getToken } from "../utils/token";
+import * as api from "../utils/api";
 
 function App() {
   const [userData, setUserData] = useState({ username: "", email: "" });
@@ -47,10 +49,31 @@ function App() {
       .then((data) => {
         // For now we just log the response data to the console.
         // We'll update this soon.
-        console.log(data);
+        if (data.jwt) {
+          setToken(data.jwt);
+          setUserData(data.user);
+          setIsLoggedIn(true);
+          navigate("/ducks");
+        }
       })
       .catch(console.error);
   };
+
+  useEffect(() => {
+    const jwt = getToken();
+
+    if (!jwt) {
+      return;
+    }
+    api
+      .getUserInfo(jwt)
+      .then(({ username, email }) => {
+        setIsLoggedIn(true);
+        setUserData({ username, email });
+        navigate("/ducks");
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <Routes>
